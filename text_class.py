@@ -71,12 +71,11 @@ def main(category, tokenizer_name, model_name, train_batch_size, eval_batch_size
     validation_dataset = Dataset.from_dict(loaded_test_set)
 
     # select small slices of the training , validation set
-
+    """
     train_dataset = concatenate_datasets([train_dataset.filter(lambda example: example['label'] == 0).select(range(100)),
                                           train_dataset.filter(lambda example: example['label'] == 1).select(range(10))])
-
     validation_dataset = validation_dataset.select(range(2000))
-
+    """
     ################################ DATA CLEANING ################################
     print("############### DATA CLEANING ###############")
 
@@ -315,5 +314,5 @@ def main(category, tokenizer_name, model_name, train_batch_size, eval_batch_size
 
 
 if __name__ == '__main__':
-    main(category="Covenant Not To Sue", tokenizer_name="distilbert-base-uncased",
-         model_name="distilbert-base-uncased", train_batch_size=4, eval_batch_size=32, lr=1e-5, num_epoch=2)
+    main(category="Covenant Not To Sue", tokenizer_name="electra-base",
+         model_name="electra-base", train_batch_size=16, eval_batch_size=32, lr=1e-5, num_epoch=4)
