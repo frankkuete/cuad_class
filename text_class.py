@@ -299,14 +299,15 @@ def main(category, tokenizer_name, model_name, train_batch_size, eval_batch_size
         # Evaluate the model on the validation set
         eval_results = trainer.evaluate()
         results[method] = eval_results
-
+        results["val_set_size"] = validation_dataset.num_rows 
+        results["val_pos_size"] =validation_dataset.filter(lambda example: example['label'] == 1).num_rows
         # Print the evaluation results
         print(eval_results)
 
     # Save evaluation results to a JSON file
     save_dir = "./results"
     save_path = os.path.join(
-        save_dir, "results_{}.json".format(model_name))
+        save_dir, "results_{}.json".format(category))
     if not os.path.exists(save_dir):
         os.mkdir(save_dir)
     with open(save_path, 'w') as f:
@@ -314,5 +315,5 @@ def main(category, tokenizer_name, model_name, train_batch_size, eval_batch_size
 
 
 if __name__ == '__main__':
-    main(category="Warranty Duration", tokenizer_name="google/electra-large-discriminator",
-         model_name="google/electra-large-discriminator", train_batch_size=16, eval_batch_size=32, lr=1e-5, num_epoch=4)
+    main(category="Competitive Restriction Exception", tokenizer_name="google/electra-large-discriminator",
+         model_name="google/electra-large-discriminator", train_batch_size=8, eval_batch_size=32, lr=1e-5, num_epoch=1)
