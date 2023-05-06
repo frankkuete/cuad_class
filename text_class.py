@@ -314,5 +314,5 @@ def main(category, tokenizer_name, model_name, train_batch_size, eval_batch_size
 
 
 if __name__ == '__main__':
-    main(category="Covenant Not To Sue", tokenizer_name="google/electra-base-discriminator",
-         model_name="google/electra-base-discriminator", train_batch_size=16, eval_batch_size=32, lr=1e-5, num_epoch=4)
+    main(category="Warranty Duration", tokenizer_name="google/electra-large-discriminator",
+         model_name="google/electra-large-discriminator", train_batch_size=16, eval_batch_size=32, lr=1e-5, num_epoch=4)
