@@ -265,7 +265,7 @@ def main(category, tokenizer_name, model_name, train_batch_size, eval_batch_size
     for dataset, method in zip(datasets, methods):
         # instantiate the training arguments
         training_args = TrainingArguments(
-            output_dir="../models/{}-{}-cuad".format(model_name, method),
+            output_dir="../models/{}-{}-cuad".format(category.replace(" ","-"), method),
             overwrite_output_dir=True,
             learning_rate=lr,
             per_device_train_batch_size=train_batch_size,
@@ -307,7 +307,7 @@ def main(category, tokenizer_name, model_name, train_batch_size, eval_batch_size
     # Save evaluation results to a JSON file
     save_dir = "./results"
     save_path = os.path.join(
-        save_dir, "results_{}.json".format(category))
+        save_dir, "results_{}.json".format(category.replace(" ","-")))
     if not os.path.exists(save_dir):
         os.mkdir(save_dir)
     with open(save_path, 'w') as f:
@@ -315,5 +315,7 @@ def main(category, tokenizer_name, model_name, train_batch_size, eval_batch_size
 
 
 if __name__ == '__main__':
-    main(category="Competitive Restriction Exception", tokenizer_name="google/electra-large-discriminator",
-         model_name="google/electra-large-discriminator", train_batch_size=8, eval_batch_size=32, lr=1e-5, num_epoch=4)
+    categories = ["Agreement Date","Effective Date","Competitive Restriction Exception","Post-Termination Services"]
+    model = "google/electra-large-discriminator"
+    for category in categories:
+        main(category=category, tokenizer_name=model,model_name=model, train_batch_size=8, eval_batch_size=32, lr=1e-5, num_epoch=4)
