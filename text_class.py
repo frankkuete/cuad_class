@@ -280,8 +280,8 @@ def main(category, tokenizer_name, model_name, train_batch_size, eval_batch_size
     for dataset, method in zip(datasets, methods):
         # instantiate the training arguments
         training_args = TrainingArguments(
-            output_dir="../class_models/{}-{}-cuad".format(
-                category.replace(" ", "_"), method),
+            output_dir="../class_models/{}/{}-cuad".format(
+                category.replace(" ", "_").replace('-',"_").replace('/',"_"), method),
             overwrite_output_dir=True,
             learning_rate=lr,
             per_device_train_batch_size=train_batch_size,
