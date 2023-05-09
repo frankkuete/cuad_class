@@ -72,13 +72,11 @@ def main(category, tokenizer_name, model_name, train_batch_size, eval_batch_size
 
     # select small slices of the training , validation set
     """
-    train_dataset = concatenate_datasets([train_dataset.filter(lambda example: example['label'] == 0).select(range(100)),
+    train_dataset = concatenate_datasets([train_dataset.filter(lambda example: example['label'] == 0).select(range(10)),
                                           train_dataset.filter(lambda example: example['label'] == 1).select(range(10))])
-    validation_dataset = validation_dataset.select(range(2000))
+    validation_dataset = validation_dataset.select(range(10))
     """
     ################################ DATA CLEANING ################################
-    print("############### DATA CLEANING ###############")
-
     def replace_spaces(string):
         # Remove long spaces
         return re.sub(r' {2,}', ' ', string)
@@ -104,18 +102,32 @@ def main(category, tokenizer_name, model_name, train_batch_size, eval_batch_size
         lambda example: {'text': pre_process_examples(example['text'])})
     train_dataset = train_dataset.filter(invalid_example)
 
+    pos_split_dataset = train_dataset.filter(
+        lambda example: example['label'] == 1).train_test_split(test_size=0.1)
+    neg_split_dataset = train_dataset.filter(
+        lambda example: example['label'] == 0).train_test_split(test_size=0.1)
+    # split the train_dataset into train and eval dataset
+    train_dataset = concatenate_datasets(
+        [pos_split_dataset['train'], neg_split_dataset['train']])
+    eval_dataset = concatenate_datasets(
+        [pos_split_dataset['test'], neg_split_dataset['test']])
+
+    # preprocess the validation dataset
     validation_dataset = validation_dataset.map(
         lambda example: {'text': pre_process_examples(example['text'])})
     validation_dataset = validation_dataset.filter(invalid_example)
 
+    # print data statistics
     print("train_dataset", train_dataset.num_rows, train_dataset.filter(
+        lambda example: example['label'] == 1).num_rows)
+    print("eval_dataset", eval_dataset.num_rows, eval_dataset.filter(
         lambda example: example['label'] == 1).num_rows)
     print("val_dataset", validation_dataset.num_rows, validation_dataset.filter(
         lambda example: example['label'] == 1).num_rows)
+
     ################################ METHOD 1 : DATA AUGMENTATION ####################################
 
     def data_augmentation(processed_train_dataset):
-        # Doc: https://nlpaug.readthedocs.io/en/latest/augmenter/word/antonym.html
         # Get the number of examples in the minority class
         minority_class_ratio = processed_train_dataset.filter(
             lambda example: example['label'] == 1).num_rows/processed_train_dataset.num_rows*100
@@ -179,9 +191,10 @@ def main(category, tokenizer_name, model_name, train_batch_size, eval_batch_size
                 pos_samples += len(positive_examples)
         return oversampled_train_dataset
     oversampled_train_dataset = oversampling_dataset(train_dataset)
+
     ################################ TOKENIZATION ####################################
 
-    # tokenized the the train , validation sets using the tokenizer from the appropriate model
+    # tokenized the train , validation sets using the tokenizer from the appropriate model
     tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
 
     def preprocess_function(examples):
@@ -191,6 +204,8 @@ def main(category, tokenizer_name, model_name, train_batch_size, eval_batch_size
     tokenized_cuad_train_oversampled = oversampled_train_dataset.map(
         preprocess_function, batched=True)
     tokenized_cuad_train_augmented = augmented_train_dataset.map(
+        preprocess_function, batched=True)
+    tokenized_cuad_eval = eval_dataset.map(
         preprocess_function, batched=True)
     tokenized_cuad_validation = validation_dataset.map(
         preprocess_function, batched=True)
@@ -265,7 +280,8 @@ def main(category, tokenizer_name, model_name, train_batch_size, eval_batch_size
     for dataset, method in zip(datasets, methods):
         # instantiate the training arguments
         training_args = TrainingArguments(
-            output_dir="../models/{}-{}-cuad".format(category.replace(" ","-"), method),
+            output_dir="../class_models/{}-{}-cuad".format(
+                category.replace(" ", "_"), method),
             overwrite_output_dir=True,
             learning_rate=lr,
             per_device_train_batch_size=train_batch_size,
@@ -285,7 +301,7 @@ def main(category, tokenizer_name, model_name, train_batch_size, eval_batch_size
             model=model,
             args=training_args,
             train_dataset=dataset,
-            eval_dataset=tokenized_cuad_validation,
+            eval_dataset=tokenized_cuad_eval,
             tokenizer=training_tokenizer,
             data_collator=data_collator,
             compute_metrics=compute_metrics,
@@ -296,18 +312,16 @@ def main(category, tokenizer_name, model_name, train_batch_size, eval_batch_size
         trainer.save_model()
         trainer.save_state()
 
-        # Evaluate the model on the validation set
-        eval_results = trainer.evaluate()
-        results[method] = eval_results
-        results["val_set_size"] = validation_dataset.num_rows 
-        results["val_pos_size"] =validation_dataset.filter(lambda example: example['label'] == 1).num_rows
+        # validate the model on the validation set
+        predictions = trainer.predict(test_dataset=tokenized_cuad_validation)
+        results[method] = predictions.metrics
         # Print the evaluation results
-        print(eval_results)
+        print(predictions.metrics)
 
     # Save evaluation results to a JSON file
     save_dir = "./results"
     save_path = os.path.join(
-        save_dir, "results_{}.json".format(category.replace(" ","-")))
+        save_dir, "results_{}.json".format(category.replace(" ", "_")))
     if not os.path.exists(save_dir):
         os.mkdir(save_dir)
     with open(save_path, 'w') as f:
@@ -315,7 +329,9 @@ def main(category, tokenizer_name, model_name, train_batch_size, eval_batch_size
 
 
 if __name__ == '__main__':
-    categories = ["Agreement Date","Effective Date","Competitive Restriction Exception","Post-Termination Services"]
+    categories = ["Source Code Escrow", "Most Favored Nation", "Unlimited/All-You-Can-Eat-License", "Third Party Beneficiary",
+                  "Affiliate License-Licensor"]
     model = "google/electra-large-discriminator"
     for category in categories:
-        main(category=category, tokenizer_name=model,model_name=model, train_batch_size=8, eval_batch_size=32, lr=1e-5, num_epoch=4)
+        main(category=category, tokenizer_name=model, model_name=model,
+             train_batch_size=8, eval_batch_size=32, lr=1e-5, num_epoch=3)
