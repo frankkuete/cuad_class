@@ -321,7 +321,7 @@ def main(category, tokenizer_name, model_name, train_batch_size, eval_batch_size
     # Save evaluation results to a JSON file
     save_dir = "./results"
     save_path = os.path.join(
-        save_dir, "results_{}.json".format(category.replace(" ", "_")))
+        save_dir, "results_{}.json".format(category.replace(" ", "_").replace('-',"_").replace('/',"_")))
     if not os.path.exists(save_dir):
         os.mkdir(save_dir)
     with open(save_path, 'w') as f:
