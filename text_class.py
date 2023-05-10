@@ -280,7 +280,7 @@ def main(category, tokenizer_name, model_name, train_batch_size, eval_batch_size
     for dataset, method in zip(datasets, methods):
         # instantiate the training arguments
         training_args = TrainingArguments(
-            output_dir="../class_models/{}/{}-cuad".format(
+            output_dir="../legal_bert_models/{}/{}-cuad".format(
                 category.replace(" ", "_").replace('-',"_").replace('/',"_"), method),
             overwrite_output_dir=True,
             learning_rate=lr,
@@ -319,7 +319,7 @@ def main(category, tokenizer_name, model_name, train_batch_size, eval_batch_size
         print(predictions.metrics)
 
     # Save evaluation results to a JSON file
-    save_dir = "./results"
+    save_dir = "./legal-bert-base-results"
     save_path = os.path.join(
         save_dir, "results_{}.json".format(category.replace(" ", "_").replace('-',"_").replace('/',"_")))
     if not os.path.exists(save_dir):
@@ -331,7 +331,7 @@ def main(category, tokenizer_name, model_name, train_batch_size, eval_batch_size
 if __name__ == '__main__':
     categories = ["Source Code Escrow", "Most Favored Nation", "Unlimited/All-You-Can-Eat-License", "Third Party Beneficiary",
                   "Affiliate License-Licensor"]
-    model = "google/electra-large-discriminator"
+    model = "nlpaueb/legal-bert-base-uncased"
     for category in categories:
         main(category=category, tokenizer_name=model, model_name=model,
              train_batch_size=8, eval_batch_size=32, lr=1e-5, num_epoch=3)
