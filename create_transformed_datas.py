@@ -44,6 +44,15 @@ def synonym_replacement(train_dataset):
             aug_src='wordnet', aug_min=0.2*len(clause_text.split()), aug_p=prob).augment(clause_text)[0]
         
         augmented_dataset.append({"text": result, "label": 1})
+    
+    for data in augmented_dataset:
+        if data["label"]==1:
+            n_pos +=1
+        else:
+            n_neg +=1
+    
+    print("Number of Positive examples", n_pos,
+          "Number of Negative examples", n_neg)
 
     return augmented_dataset
 
@@ -64,6 +73,9 @@ def random_oversampling(train_dataset):
         positive_example = positive_examples.select(
             random.sample(range(0, pos_samples), 10))
         train_dataset = concatenate_datasets([train_dataset, positive_example])
+    
+    print("Number of Positive examples", train_dataset.filter(lambda example: example['label'] == 1).num_rows, "Number of Negative examples", train_dataset.filter(lambda example: example['label'] == 0).num_rows)
+    
     return train_dataset
 
 if __name__ == "__main__":
