@@ -138,7 +138,7 @@ if __name__ == "__main__":
             "csv", data_files="./data/"+cat+"/train.csv", split="train")
         ros_dataset = random_oversampling(dataset)
         ros_dataset = [data for data in ros_dataset]
-        aug_dataset = back_translation(dataset)
+        aug_dataset = backtranslation(dataset)
         print("#"*100)
         print("Creation of the random oversampled "+cat+" train dataset")
         create_csv_file(ros_dataset, "data/"+cat, "oversampled-train.csv")
