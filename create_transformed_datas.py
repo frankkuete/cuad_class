@@ -44,7 +44,7 @@ def back_translation(train_dataset):
     for i in tqdm(list(range(offset//pos_samples))):
         for example in positive_examples:
             middle = random.choice(
-                ["fr", "es", "nl", "pt", "da", "hr", "it", "de", "ca", "el"])
+                ["fr", "es", "nl", "pt", "it", "de"])
             result = trans.translate(
                 example['text'], src='en', tmp=middle, sleeping=0.1)
             augmented_dataset.append({"text": result.result_text, "label": 1})
