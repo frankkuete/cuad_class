@@ -45,6 +45,8 @@ def synonym_replacement(train_dataset):
         
         augmented_dataset.append({"text": result, "label": 1})
     
+    n_pos = 0
+    n_neg = 0
     for data in augmented_dataset:
         if data["label"]==1:
             n_pos +=1
