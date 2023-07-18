@@ -1,3 +1,4 @@
+from transformers import MarianMTModel, MarianTokenizer
 from datasets import concatenate_datasets, load_dataset
 import random
 from tqdm import tqdm
@@ -48,6 +49,61 @@ def back_translation(train_dataset):
             result = trans.translate(
                 example['text'], src='en', tmp=middle, sleeping=0.1)
             augmented_dataset.append({"text": result.result_text, "label": 1})
+    return augmented_dataset
+
+
+def backtranslate(texts, middle):
+
+    model_name = f'Helsinki-NLP/opus-mt-{"en"}-{middle}'
+    tokenizer1 = MarianTokenizer.from_pretrained(model_name)
+    model1 = MarianMTModel.from_pretrained(model_name)
+
+    # Generate translation using model
+    translated = model1.generate(
+        **tokenizer1(texts, return_tensors="pt", padding=True))
+
+    # Decode the translated output
+    translated_texts = [tokenizer2.decode(
+        t, skip_special_tokens=True) for t in translated]
+
+    model_name = f'Helsinki-NLP/opus-mt-{"en"}-{middle}'
+    tokenizer2 = MarianTokenizer.from_pretrained(model_name)
+    model2 = MarianMTModel.from_pretrained(model_name)
+
+    # Translate the text back to the source language
+    backtranslated = model2.generate(
+        **tokenizer2(translated_texts, return_tensors="pt", padding=True, truncation=True))
+
+    # Decode the backtranslated output
+    backtranslated_texts = [tokenizer2.decode(
+        t, skip_special_tokens=True) for t in backtranslated]
+    
+    return backtranslated_texts
+
+
+def backtranslation(train_dataset):
+    # Calculate the number of positive and negative samples in the training set
+    pos_samples = train_dataset.filter(
+        lambda example: example['label'] == 1).num_rows
+    neg_samples = train_dataset.filter(
+        lambda example: example['label'] == 0).num_rows
+
+    positive_examples = train_dataset.filter(
+        lambda example: example['label'] == 1)
+    positive_examples = [example['text'] for example in positive_examples]
+    augmented_dataset = [example for example in train_dataset]
+
+    if neg_samples > pos_samples:
+        offset = abs(pos_samples-neg_samples)
+    else:
+        return train_dataset
+
+    for i in tqdm(list(range(offset//pos_samples))):
+        middle = random.choice(["fr", "es", "de"])
+        results = backtranslate(positive_examples, middle)
+        for result in results:
+            augmented_dataset.append({"text": result, "label": 1})
+
     return augmented_dataset
 
 def random_oversampling(train_dataset):
