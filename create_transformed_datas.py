@@ -1,10 +1,10 @@
-from transformers import MarianMTModel, MarianTokenizer
 from datasets import concatenate_datasets, load_dataset
 import random
 from tqdm import tqdm
 import os
 import csv
-from BackTranslation import BackTranslation
+import nlpaug.augmenter.word as naw
+
 
 def create_csv_file(data, file_path, filename):
     texts = [d['text'] for d in data]
@@ -20,68 +20,7 @@ def create_csv_file(data, file_path, filename):
         # Write each row of data
         writer.writerows(tuples)
 
-
-def back_translation(train_dataset):
-    trans = BackTranslation(url=[
-        'translate.google.com',
-        'translate.google.co.kr',
-    ], proxies={'http': '127.0.0.1:1234', 'http://host.name': '127.0.0.1:4012'})
-
-    # Calculate the number of positive and negative samples in the training set
-    pos_samples = train_dataset.filter(
-        lambda example: example['label'] == 1).num_rows
-    neg_samples = train_dataset.filter(
-        lambda example: example['label'] == 0).num_rows
-
-    positive_examples = train_dataset.filter(
-        lambda example: example['label'] == 1)
-    positive_examples = [example for example in positive_examples]
-    augmented_dataset = [example for example in train_dataset]
-    if neg_samples > pos_samples:
-        offset = abs(pos_samples-neg_samples)//2
-    else:
-        return train_dataset
-
-    for i in tqdm(list(range(offset//pos_samples))):
-        for example in positive_examples:
-            middle = random.choice(
-                ["fr", "es", "de"])
-            result = trans.translate(
-                example['text'], src='en', tmp=middle, sleeping=0.05)
-            augmented_dataset.append({"text": result.result_text, "label": 1})
-    return augmented_dataset
-
-
-def backtranslate(texts, middle):
-
-    model_name = f'Helsinki-NLP/opus-mt-{"en"}-{middle}'
-    tokenizer1 = MarianTokenizer.from_pretrained(model_name)
-    model1 = MarianMTModel.from_pretrained(model_name)
-
-    # Generate translation using model
-    translated = model1.generate(
-        **tokenizer1(texts, return_tensors="pt", padding=True))
-
-    # Decode the translated output
-    translated_texts = [tokenizer2.decode(
-        t, skip_special_tokens=True) for t in translated]
-
-    model_name = f'Helsinki-NLP/opus-mt-{"en"}-{middle}'
-    tokenizer2 = MarianTokenizer.from_pretrained(model_name)
-    model2 = MarianMTModel.from_pretrained(model_name)
-
-    # Translate the text back to the source language
-    backtranslated = model2.generate(
-        **tokenizer2(translated_texts, return_tensors="pt", padding=True, truncation=True))
-
-    # Decode the backtranslated output
-    backtranslated_texts = [tokenizer2.decode(
-        t, skip_special_tokens=True) for t in backtranslated]
-    
-    return backtranslated_texts
-
-
-def backtranslation(train_dataset):
+def synonym_replacement(train_dataset):
     # Calculate the number of positive and negative samples in the training set
     pos_samples = train_dataset.filter(
         lambda example: example['label'] == 1).num_rows
@@ -98,11 +37,13 @@ def backtranslation(train_dataset):
     else:
         return train_dataset
 
-    for i in tqdm(list(range(offset//pos_samples))):
-        middle = random.choice(["fr", "es", "de"])
-        results = backtranslate(positive_examples, middle)
-        for result in results:
-            augmented_dataset.append({"text": result, "label": 1})
+    for i in tqdm(list(range(offset))):
+        prob = random.choice([0.2,0.4,0.6,0.8,0.99])
+        clause_text = random.choice(positive_examples)
+        result = naw.SynonymAug(
+            aug_src='wordnet', aug_min=0.2*len(clause_text.split()), aug_p=prob).augment(clause_text)[0]
+        
+        augmented_dataset.append({"text": result, "label": 1})
 
     return augmented_dataset
 
@@ -138,8 +79,9 @@ if __name__ == "__main__":
             "csv", data_files="./data/"+cat+"/train.csv", split="train")
         ros_dataset = random_oversampling(dataset)
         ros_dataset = [data for data in ros_dataset]
-        aug_dataset = back_translation(dataset)
+        aug_dataset = synonym_replacement(dataset)
         print("#"*100)
         print("Creation of the random oversampled "+cat+" train dataset")
         create_csv_file(ros_dataset, "data/"+cat, "oversampled-train.csv")
+        print("#"*100)
         create_csv_file(aug_dataset, "data/"+cat, "augmented-train.csv")
