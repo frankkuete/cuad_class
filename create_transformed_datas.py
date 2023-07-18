@@ -37,14 +37,14 @@ def back_translation(train_dataset):
     positive_examples = [example for example in positive_examples]
     augmented_dataset = [example for example in train_dataset]
     if neg_samples > pos_samples:
-        offset = abs(pos_samples-neg_samples)
+        offset = abs(pos_samples-neg_samples)//2
     else:
         return train_dataset
 
     for i in tqdm(list(range(offset//pos_samples))):
         for example in positive_examples:
             middle = random.choice(
-                ["fr", "es", "nl", "pt", "it", "de"])
+                ["fr", "es", "nl", "it", "de"])
             result = trans.translate(
                 example['text'], src='en', tmp=middle, sleeping=0.1)
             augmented_dataset.append({"text": result.result_text, "label": 1})
