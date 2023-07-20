@@ -103,18 +103,17 @@ if __name__ == '__main__':
     # Evaluate the results of the training
     accuracy = evaluate.load("accuracy")
 
-    def get_prec_at_recall(precisions, recalls, confs, recall_thresh=0.9):
-        """
-        return the precisions , for a specified recall theshold
-        Assumes recalls are sorted in increasing order
-        """
-        prec_at_recall = 0
-        for prec, recall, conf in zip(reversed(precisions), reversed(recalls), confs):
-            if recall >= recall_thresh:
-                prec_at_recall = prec
-                break
-        return prec_at_recall
+    def get_prec_at_recall(precisions, recalls, recall_thresh):
+        # If the target recall is outside the range of recalls, return None
+        if recall_thresh < recalls[0] or recall_thresh > recalls[-1]:
+            return None
 
+        # Use NumPy to interpolate precision at the given target recall
+        precision_at_target_recall = np.interp(
+            recall_thresh, recalls, precisions)
+
+        return precision_at_target_recall
+    
     def compute_metrics(eval_pred):
         # get predictions logits and gt_labels
         predictions, labels = eval_pred
@@ -125,7 +124,7 @@ if __name__ == '__main__':
         predictions = np.argmax(predictions, axis=1)
 
         # precision-recall curve
-        thresholds = np.linspace(0, 0.99, num=100)
+        thresholds = np.linspace(0.99, 0, num=100)
         precisions = []
         recalls = []
         for threshold in thresholds:
@@ -142,8 +141,8 @@ if __name__ == '__main__':
         results = {"accuracy": accuracy.compute(predictions=predictions, references=labels)["accuracy"],
                    "precision": precisions,
                    "recall": recalls,
-                   "precision_at_80_recall":  get_prec_at_recall(precisions, recalls, thresholds, recall_thresh=0.8),
-                   "precision_at_90_recall":  get_prec_at_recall(precisions, recalls, thresholds, recall_thresh=0.9),
+                   "precision_at_80_recall":  get_prec_at_recall(precisions, recalls, recall_thresh=0.8),
+                   "precision_at_90_recall":  get_prec_at_recall(precisions, recalls, recall_thresh=0.9),
                    "aupr": aupr}
 
         return results
@@ -161,7 +160,7 @@ if __name__ == '__main__':
 
     # instantiate the training arguments
     training_args = TrainingArguments(
-        output_dir="./class_models",
+        output_dir="./seq_class_models",
         overwrite_output_dir=True,
         learning_rate=args.learning_rate,
         per_device_train_batch_size=args.per_device_train_batch_size,
@@ -190,8 +189,8 @@ if __name__ == '__main__':
 
     # start the training
     trainer.train()
-    #trainer.save_model()
-    #trainer.save_state()
+    trainer.save_model()
+    trainer.save_state()
 
     # validate the model on the validation set
     predictions = trainer.predict(test_dataset=tokenized_test_set)
@@ -200,4 +199,15 @@ if __name__ == '__main__':
     print(predictions.metrics)
 
     # Save evaluation results to a JSON file
+    category_name = args.train_file.split("/")[2]
+    save_path = os.path.join(
+        "results", category_name, args.model_name, "results.json")
+    if not os.path.exists("results"):
+        os.mkdir("results")
+    if not os.path.exists("results"+category_name):
+        os.mkdir("results"+category_name)
+    if not os.path.exists("results"+category_name+args.model_name):
+        os.mkdir("results"+category_name+args.model_name)
+    with open(save_path, 'w') as f:
+        json.dump(predictions.metrics, f)
 
