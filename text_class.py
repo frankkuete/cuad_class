@@ -239,9 +239,9 @@ def main(category, tokenizer_name, model_name, train_batch_size, eval_batch_size
         predictions = np.argmax(predictions, axis=1)
 
         # precision-recall curve
-        thresholds = np.linspace(0, 1, num=101)
-        precisions = []
-        recalls = []
+        thresholds = np.linspace(0, 0.99, num=100)
+        precisions = [1]
+        recalls = [0]
         for threshold in thresholds:
             threshold_predictions = probs[:, 1] > threshold
             threshold_predictions = threshold_predictions.astype(int)
