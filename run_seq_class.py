@@ -104,9 +104,6 @@ if __name__ == '__main__':
     accuracy = evaluate.load("accuracy")
 
     def get_prec_at_recall(precisions, recalls, recall_thresh):
-        # If the target recall is outside the range of recalls, return None
-        if recall_thresh < recalls[0] or recall_thresh > recalls[-1]:
-            return None
 
         # Use NumPy to interpolate precision at the given target recall
         precision_at_target_recall = np.interp(
@@ -205,9 +202,9 @@ if __name__ == '__main__':
     if not os.path.exists("results"):
         os.mkdir("results")
     if not os.path.exists("results/"+category_name):
-        os.mkdir("results"+category_name)
+        os.mkdir("results/"+category_name)
     if not os.path.exists("results/"+category_name+"/"+args.model_name):
-        os.mkdir("results"+category_name+args.model_name)
+        os.mkdir("results/"+category_name+"/"+args.model_name)
     with open(save_path, 'w') as f:
         json.dump(predictions.metrics, f)
 
