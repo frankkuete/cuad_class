@@ -121,7 +121,7 @@ if __name__ == '__main__':
         predictions = np.argmax(predictions, axis=1)
 
         # precision-recall curve
-        thresholds = np.linspace(0,0.99, num=100)
+        thresholds = np.linspace(0.99,0, num=100)
         precisions = []
         recalls = []
         for threshold in thresholds:
