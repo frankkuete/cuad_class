@@ -1,6 +1,6 @@
 python run_seq_class.py \
 --model_name "bert-base-uncased" \
---learning_rate 1e5 \
+--learning_rate 1e-5 \
 --num_train_epochs 3 \
 --per_device_train_batch_size 32 \
 --per_device_eval_batch_size 16 \

@@ -20,7 +20,8 @@ if __name__ == '__main__':
     
     parser.add_argument("--model_name", help="Path to pretrained model or model identifier from huggingface.co/models")
 
-    parser.add_argument( "--learning_rate", help="learning_rate of the during the training phase")
+    parser.add_argument(
+        "--learning_rate", help="learning_rate of the during the training phase", type=float)
 
 
     parser.add_argument("--num_train_epochs", type=int, help="number of training epochs")
@@ -35,7 +36,7 @@ if __name__ == '__main__':
 
     print(args.train_file)
     print(args.model_name)
-    print(args.learning_rate)
+    print(args.learning_rate , type(args.learning_rate))
     print(args.num_train_epochs)
     print(args.per_device_train_batch_size)
     print(args.per_device_eval_batch_size)
