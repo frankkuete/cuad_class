@@ -124,7 +124,7 @@ if __name__ == '__main__':
         predictions = np.argmax(predictions, axis=1)
 
         # precision-recall curve
-        thresholds = np.linspace(0.99, 0, num=100)
+        thresholds = np.linspace(0,0.99, num=100)
         precisions = []
         recalls = []
         for threshold in thresholds:
@@ -204,9 +204,9 @@ if __name__ == '__main__':
         "results", category_name, args.model_name, "results.json")
     if not os.path.exists("results"):
         os.mkdir("results")
-    if not os.path.exists("results"+category_name):
+    if not os.path.exists("results/"+category_name):
         os.mkdir("results"+category_name)
-    if not os.path.exists("results"+category_name+args.model_name):
+    if not os.path.exists("results/"+category_name+"/"+args.model_name):
         os.mkdir("results"+category_name+args.model_name)
     with open(save_path, 'w') as f:
         json.dump(predictions.metrics, f)
