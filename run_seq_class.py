@@ -128,9 +128,7 @@ if __name__ == '__main__':
         precisions = []
         recalls = []
         for threshold in thresholds:
-            print(probs)
             threshold_predictions = probs[:, 1] > threshold
-            print(threshold_predictions)
             threshold_predictions = threshold_predictions.astype(int)
             precisions.append(precision_score(
                 y_true=labels, y_pred=threshold_predictions, zero_division=1))
