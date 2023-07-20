@@ -163,7 +163,7 @@ if __name__ == '__main__':
 
     # instantiate the training arguments
     training_args = TrainingArguments(
-        output_dir="",
+        output_dir="./",
         overwrite_output_dir=True,
         learning_rate=args.learning_rate,
         per_device_train_batch_size=args.per_device_train_batch_size,
