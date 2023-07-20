@@ -197,8 +197,9 @@ if __name__ == '__main__':
 
     # Save evaluation results to a JSON file
     category_name = args.train_file.split("/")[2]
+    dataset_strategy = args.train_file.split("/")[3].split(".")[0]
     save_path = os.path.join(
-        "results", category_name, args.model_name, "results.json")
+        "results", category_name, args.model_name, "test-results-{}.json".format(dataset_strategy))
     if not os.path.exists("results"):
         os.mkdir("results")
     if not os.path.exists("results/"+category_name):
