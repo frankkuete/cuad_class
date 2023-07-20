@@ -137,7 +137,6 @@ if __name__ == '__main__':
 
         # Compute AUPR
         aupr = auc(recalls, precisions)
-        print(recalls, precisions)
         # Return results as a dictionary
         results = {"accuracy": accuracy.compute(predictions=predictions, references=labels)["accuracy"],
                    "precision": precisions,
@@ -161,7 +160,7 @@ if __name__ == '__main__':
 
     # instantiate the training arguments
     training_args = TrainingArguments(
-        output_dir="./",
+        output_dir="./class_models",
         overwrite_output_dir=True,
         learning_rate=args.learning_rate,
         per_device_train_batch_size=args.per_device_train_batch_size,
@@ -189,7 +188,7 @@ if __name__ == '__main__':
     )
 
     # start the training
-    #trainer.train()
+    trainer.train()
     #trainer.save_model()
     #trainer.save_state()
 
@@ -197,7 +196,7 @@ if __name__ == '__main__':
     predictions = trainer.predict(test_dataset=tokenized_test_set)
 
     # Print the evaluation results
-    #print(predictions.metrics)
+    print(predictions.metrics)
 
     # Save evaluation results to a JSON file
 
