@@ -137,7 +137,7 @@ if __name__ == '__main__':
 
         # Compute AUPR
         aupr = auc(recalls, precisions)
-
+        print(recalls, precisions)
         # Return results as a dictionary
         results = {"accuracy": accuracy.compute(predictions=predictions, references=labels)["accuracy"],
                    "precision": precisions,
