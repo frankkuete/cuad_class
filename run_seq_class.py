@@ -97,7 +97,9 @@ if __name__ == '__main__':
 
     # Evaluate the results of the training
     accuracy = evaluate.load("accuracy")
-
+    f1score = evaluate.load("f1")
+    precision = evaluate.load("precision")
+    recall = evaluate.load("recall")
     def get_prec_at_recall(precisions, recalls, recall_thresh):
 
         # Use NumPy to interpolate precision at the given target recall
@@ -131,6 +133,9 @@ if __name__ == '__main__':
         aupr = auc(recalls, precisions)
         # Return results as a dictionary
         results = {"accuracy": accuracy.compute(predictions=predictions, references=labels)["accuracy"],
+                   "f1score": f1score.compute(predictions=predictions, references=labels)["f1score"],
+                   "precision": precision.compute(predictions=predictions, references=labels)["precision"],
+                   "recall": recall.compute(predictions=predictions, references=labels)["recall"],
                    "precision": precisions,
                    "recall": recalls,
                    "precision_at_80_recall":  get_prec_at_recall(precisions, recalls, recall_thresh=0.8),
