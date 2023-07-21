@@ -97,7 +97,7 @@ if __name__ == '__main__':
 
     # Evaluate the results of the training
     accuracy = evaluate.load("accuracy")
-    f1score = evaluate.load("f1")
+    f1 = evaluate.load("f1")
     precision = evaluate.load("precision")
     recall = evaluate.load("recall")
     def get_prec_at_recall(precisions, recalls, recall_thresh):
@@ -119,8 +119,12 @@ if __name__ == '__main__':
 
         # precision-recall curve
         thresholds = np.linspace(0.99,0, num=100)
-        precisions = []
-        recalls = []
+
+        # At 100% of threshold probability all predictions are negative (since every prediction have positive prob < 1)
+        # At this threshold probability the recall is then  0% (TP = 0) 
+        # and the precision is 100% by convention (because it is not defined => TP=0 and TP+FP=0)
+        precisions = [1]
+        recalls = [0]
         for threshold in thresholds:
             threshold_predictions = probs[:, 1] > threshold
             threshold_predictions = threshold_predictions.astype(int)
@@ -133,7 +137,7 @@ if __name__ == '__main__':
         aupr = auc(recalls, precisions)
         # Return results as a dictionary
         results = {"accuracy": accuracy.compute(predictions=predictions, references=labels)["accuracy"],
-                   "f1score": f1score.compute(predictions=predictions, references=labels)["f1"],
+                   "f1": f1.compute(predictions=predictions, references=labels)["f1"],
                    "precision": precision.compute(predictions=predictions, references=labels)["precision"],
                    "recall": recall.compute(predictions=predictions, references=labels)["recall"],
                    "precisions": precisions,

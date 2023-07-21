@@ -33,7 +33,7 @@ def synonym_replacement(train_dataset):
     augmented_dataset = [example for example in train_dataset]
 
     if neg_samples > pos_samples:
-        offset = abs(pos_samples-neg_samples)//2
+        offset = abs(pos_samples-neg_samples)
     else:
         return train_dataset
 
@@ -68,7 +68,7 @@ def random_oversampling(train_dataset):
     positive_examples = train_dataset.filter(
         lambda example: example['label'] == 1)
     if neg_samples > pos_samples:
-        offset = abs(pos_samples-neg_samples)//2
+        offset = abs(pos_samples-neg_samples)
     else:
         return train_dataset
     for i in tqdm(list(range(offset//10))):
