@@ -123,8 +123,8 @@ if __name__ == '__main__':
         # At 100% of threshold probability all predictions are negative (since every prediction have positive prob < 1)
         # At this threshold probability the recall is then  0% (TP = 0) 
         # and the precision is 100% by convention (because it is not defined => TP=0 and TP+FP=0)
-        precisions = [1]
-        recalls = [0]
+        precisions = [1.0]
+        recalls = [0.0]
         for threshold in thresholds:
             threshold_predictions = probs[:, 1] > threshold
             threshold_predictions = threshold_predictions.astype(int)
