@@ -18,6 +18,9 @@ if __name__ == '__main__':
     parser.add_argument(
         "--test_file", help="The input test data file (a text file).",type=str)
     
+    parser.add_argument(
+        "--validation_file", help="The input validation data file (a text file).", type=str)
+    
     parser.add_argument("--model_name", help="Path to pretrained model or model identifier from huggingface.co/models")
 
     parser.add_argument(
@@ -34,7 +37,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     print(args.train_file)
-    print(args.model_name)
+    print(args.test_file)
+    print(args.validation_file)
     print(args.learning_rate , type(args.learning_rate))
     print(args.num_train_epochs)
     print(args.per_device_train_batch_size)
@@ -50,19 +54,11 @@ if __name__ == '__main__':
     # Loading the training set and the test set from the given files
     train_set = load_dataset(
         "csv", data_files=args.train_file, split="train")
+    validation_set = load_dataset(
+        "csv", data_files=args.validation_set, split="train")
     test_set = load_dataset(
         "csv", data_files=args.test_file, split="train")
     
-    pos_split_dataset = train_set.filter(
-        lambda example: example['label'] == 1).train_test_split(test_size=0.1 ,shuffle=False)
-    neg_split_dataset = train_set.filter(
-        lambda example: example['label'] == 0).train_test_split(test_size=0.1,shuffle=False)
-    
-    train_set = concatenate_datasets(
-        [pos_split_dataset['train'], neg_split_dataset['train']])
-    validation_set = concatenate_datasets(
-        [pos_split_dataset['test'], neg_split_dataset['test']])
-
     # Create a tokenizer for the specified model name
     tokenizer = AutoTokenizer.from_pretrained(args.model_name)
 

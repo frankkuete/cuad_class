@@ -5,6 +5,7 @@ python run_seq_class.py \
 --per_device_train_batch_size 24 \
 --per_device_eval_batch_size 16 \
 --train_file "./data/Non-Disparagement/train.csv" \
+--validation_file "./data/Non-Disparagement/validation.csv" \
 --test_file "./data/Non-Disparagement/test.csv" \
 
 python run_seq_class.py \
@@ -14,6 +15,7 @@ python run_seq_class.py \
 --per_device_train_batch_size 24 \
 --per_device_eval_batch_size 16 \
 --train_file "./data/Non-Disparagement/oversampled-train.csv" \
+--validation_file "./data/Non-Disparagement/validation.csv" \
 --test_file "./data/Non-Disparagement/test.csv" \
 
 python run_seq_class.py \
@@ -23,4 +25,5 @@ python run_seq_class.py \
 --per_device_train_batch_size 24 \
 --per_device_eval_batch_size 16 \
 --train_file "./data/Non-Disparagement/augmented-train.csv" \
+--validation_file "./data/Non-Disparagement/validation.csv" \
 --test_file "./data/Non-Disparagement/test.csv" \
