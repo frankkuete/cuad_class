@@ -55,7 +55,7 @@ if __name__ == '__main__':
     train_set = load_dataset(
         "csv", data_files=args.train_file, split="train")
     validation_set = load_dataset(
-        "csv", data_files=args.validation_set, split="train")
+        "csv", data_files=args.validation_file, split="train")
     test_set = load_dataset(
         "csv", data_files=args.test_file, split="train")
     
