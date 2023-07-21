@@ -133,7 +133,7 @@ if __name__ == '__main__':
         aupr = auc(recalls, precisions)
         # Return results as a dictionary
         results = {"accuracy": accuracy.compute(predictions=predictions, references=labels)["accuracy"],
-                   "f1score": f1score.compute(predictions=predictions, references=labels)["f1score"],
+                   "f1score": f1score.compute(predictions=predictions, references=labels)["f1"],
                    "precision": precision.compute(predictions=predictions, references=labels)["precision"],
                    "recall": recall.compute(predictions=predictions, references=labels)["recall"],
                    "precision": precisions,
