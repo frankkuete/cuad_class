@@ -136,8 +136,8 @@ if __name__ == '__main__':
                    "f1score": f1score.compute(predictions=predictions, references=labels)["f1"],
                    "precision": precision.compute(predictions=predictions, references=labels)["precision"],
                    "recall": recall.compute(predictions=predictions, references=labels)["recall"],
-                   "precision": precisions,
-                   "recall": recalls,
+                   "precisions": precisions,
+                   "recalls": recalls,
                    "precision_at_80_recall":  get_prec_at_recall(precisions, recalls, recall_thresh=0.8),
                    "precision_at_90_recall":  get_prec_at_recall(precisions, recalls, recall_thresh=0.9),
                    "aupr": aupr}
