@@ -98,4 +98,5 @@ if __name__ == "__main__":
         print("Creation of the random oversampled "+cat+" train dataset")
         create_csv_file(ros_dataset, "data/"+cat, "oversampled-train.csv")
         print("#"*100)
+        print("Creation of synomym replacement "+cat+" train dataset")
         create_csv_file(aug_dataset, "data/"+cat, "augmented-train.csv")

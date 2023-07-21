@@ -23,7 +23,6 @@ if __name__ == '__main__':
     parser.add_argument(
         "--learning_rate", help="learning_rate of the during the training phase", type=float)
 
-
     parser.add_argument("--num_train_epochs", type=int, help="number of training epochs")
 
     parser.add_argument("--per_device_train_batch_size", type=int,

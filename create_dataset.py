@@ -1,5 +1,5 @@
 from transformers import AutoTokenizer
-from datasets import load_dataset , concatenate_datasets
+from datasets import load_dataset, concatenate_datasets , Dataset
 import nltk
 from nltk.tokenize import sent_tokenize
 import re
@@ -128,9 +128,34 @@ if __name__ == "__main__":
     for cat in categories:  
         if not os.path.exists("./data/"+cat): 
             os.mkdir("./data/"+cat)
-        for split in ["train", "test"]:
-            print("#"*100)
-            print("Creation of the "+cat+" "+split+" dataset")
-            created_dataset =create_dataset(cat , split) 
-            print(len(created_dataset))
-            create_csv_file( created_dataset, "data/"+cat, split+".csv")
+        
+        print("#"*100)
+        print("Creation of the "+cat+" datasets")
+
+        # generate the train set 
+        train_set = create_dataset(cat , "train") 
+
+        # split the train set positive examples into train and validation set 
+        pos_splitted_examples = Dataset.from_list(train_set).filter(
+            lambda example: example['label'] == 1).train_test_split(test_size=0.1, shuffle=False)
+        
+        # split the train set negative examples into train and validation set
+        neg_splitted_examples = Dataset.from_list(train_set).filter(
+            lambda example: example['label'] == 0).train_test_split(test_size=0.1, shuffle=False)
+        
+        print("total numbers : ", Dataset.from_list(train_set).num_rows, "num pos train ",
+              pos_splitted_examples['train'].num_rows, "num neg train", neg_splitted_examples['train'].num_rows, "num pos valid", pos_splitted_examples['test'].num_rows, "num neg valid ", neg_splitted_examples['test'].num_rows)
+
+        # create final train set and validation set
+        train_set = concatenate_datasets([pos_splitted_examples["train"], neg_splitted_examples["train"]])
+        validation_set = concatenate_datasets(
+            [pos_splitted_examples["test"], neg_splitted_examples["test"]])
+        
+        create_csv_file([example for example in train_set],
+                        "data/" + cat ,  "/train.csv")
+        create_csv_file([example for example in validation_set],
+                        "data/" + cat ,  "validation.csv")
+
+        # generate the test set
+        test_set = create_dataset(cat, "test")
+        create_csv_file( test_set, "data/"+ cat , "/test.csv")
