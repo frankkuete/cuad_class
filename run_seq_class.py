@@ -208,7 +208,7 @@ if __name__ == '__main__':
         os.mkdir("results")
     if not os.path.exists("results/"+category_name):
         os.mkdir("results/"+category_name)
-    if not os.path.exists("results/"+category_name+"/"+args.model_name):
+    if not os.path.exists("results/"+category_name+"/"+args.model_name.split("/")[-1]):
         os.mkdir("results/"+category_name+"/"+args.model_name)
     with open(save_path, 'w') as f:
         json.dump(predictions.metrics, f)
