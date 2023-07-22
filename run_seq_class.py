@@ -75,17 +75,17 @@ if __name__ == '__main__':
     tokenized_validation_set = validation_set.map(
         preprocess_function, batched=True)
     
-    print("#"*15)
-    print(tokenized_train_set.num_rows,tokenized_train_set.filter(
-        lambda example: example['label'] == 1).num_rows, tokenized_train_set.filter(
+    print("#"*50)
+    print("train set rows: ", tokenized_train_set.num_rows, "train set positive rows: ", tokenized_train_set.filter(
+        lambda example: example['label'] == 1).num_rows, "train set negative rows: ", tokenized_train_set.filter(
         lambda example: example['label'] == 0).num_rows)
-    print("#"*15)
-    print(tokenized_test_set.num_rows, tokenized_test_set.filter(
-        lambda example: example['label'] == 1).num_rows, tokenized_test_set.filter(
+    print("#"*50)
+    print("test set rows: ", tokenized_test_set.num_rows, "test set positive rows: ", tokenized_test_set.filter(
+        lambda example: example['label'] == 1).num_rows,  "test set negative rows: ", tokenized_test_set.filter(
         lambda example: example['label'] == 0).num_rows)
-    print("#"*15)
-    print(tokenized_validation_set.num_rows, tokenized_validation_set.filter(
-        lambda example: example['label'] == 1).num_rows, tokenized_validation_set.filter(
+    print("#"*50)
+    print("validation set rows: ", tokenized_validation_set.num_rows, "validation set positive rows: ", tokenized_validation_set.filter(
+        lambda example: example['label'] == 1).num_rows, "validation set negative rows: ", tokenized_validation_set.filter(
         lambda example: example['label'] == 0).num_rows)
 
     #----------------------------------------------------------------------------------------------------------#
