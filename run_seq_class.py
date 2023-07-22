@@ -39,7 +39,7 @@ if __name__ == '__main__':
     print(args.train_file)
     print(args.test_file)
     print(args.validation_file)
-    print(args.learning_rate , type(args.learning_rate))
+    print(args.learning_rate )
     print(args.num_train_epochs)
     print(args.per_device_train_batch_size)
     print(args.per_device_eval_batch_size)
@@ -75,18 +75,27 @@ if __name__ == '__main__':
     tokenized_validation_set = validation_set.map(
         preprocess_function, batched=True)
     
-    print("#"*50)
-    print("train set rows: ", tokenized_train_set.num_rows, "train set positive rows: ", tokenized_train_set.filter(
-        lambda example: example['label'] == 1).num_rows, "train set negative rows: ", tokenized_train_set.filter(
-        lambda example: example['label'] == 0).num_rows)
-    print("#"*50)
-    print("test set rows: ", tokenized_test_set.num_rows, "test set positive rows: ", tokenized_test_set.filter(
-        lambda example: example['label'] == 1).num_rows,  "test set negative rows: ", tokenized_test_set.filter(
-        lambda example: example['label'] == 0).num_rows)
-    print("#"*50)
-    print("validation set rows: ", tokenized_validation_set.num_rows, "validation set positive rows: ", tokenized_validation_set.filter(
-        lambda example: example['label'] == 1).num_rows, "validation set negative rows: ", tokenized_validation_set.filter(
-        lambda example: example['label'] == 0).num_rows)
+    # get datasets statistics
+    train_num_rows, pos_train_num_rows, neg_train_num_rows = tokenized_train_set.num_rows, tokenized_train_set.filter(
+        lambda ex: ex['label'] == 1).num_rows, tokenized_train_set.filter(lambda ex: ex['label'] == 0).num_rows
+    
+    validation_num_rows, pos_validation_num_rows, neg_validation_num_rows = tokenized_validation_set.num_rows, tokenized_validation_set.filter(
+        lambda ex: ex['label'] == 1).num_rows, tokenized_validation_set.filter(lambda ex: ex['label'] == 0).num_rows
+
+    test_num_rows, pos_test_num_rows, neg_test_num_rows = tokenized_test_set.num_rows, tokenized_test_set.filter(
+        lambda ex: ex['label'] == 1).num_rows, tokenized_test_set.filter(lambda ex: ex['label'] == 0).num_rows
+    
+    print("#"*100)
+    print("train set rows: ", train_num_rows, "train set positive rows: ",
+          pos_train_num_rows, "train set negative rows: ", neg_train_num_rows)
+    print("#"*100)
+    print("validation set rows: ", validation_num_rows, "validation set positive rows: ",
+          pos_validation_num_rows, "validation set negative rows: ", neg_validation_num_rows)
+    print("#"*100)
+    print("test set rows: ", test_num_rows, "test set positive rows: ",
+          pos_test_num_rows,  "test set negative rows: ", neg_test_num_rows)
+    
+    
 
     #----------------------------------------------------------------------------------------------------------#
     #                                                                                                          #
@@ -159,9 +168,15 @@ if __name__ == '__main__':
     # define the data collator
     data_collator = DataCollatorWithPadding(tokenizer=training_tokenizer)
 
+    # get the dataset name , the train strategies and the model names
+    dataset_name = args.train_file.split("/")[2]
+    train_strategy = args.train_file.split("/")[3].split(".")[0]
+    model_name = args.model_name.split("/")[-1]
+
     # instantiate the training arguments
     training_args = TrainingArguments(
-        output_dir="./seq_class_models",
+        output_dir="./finetuned_models/{}/{}/{}".format(
+            dataset_name, model_name, train_strategy),
         overwrite_output_dir=True,
         learning_rate=args.learning_rate,
         per_device_train_batch_size=args.per_device_train_batch_size,
@@ -189,9 +204,9 @@ if __name__ == '__main__':
     )
 
     # start the training
-    trainer.train()
-    trainer.save_model()
-    trainer.save_state()
+    #trainer.train()
+    #trainer.save_model()
+    #trainer.save_state()
 
     # validate the model on the validation set
     predictions = trainer.predict(test_dataset=tokenized_test_set)
@@ -200,16 +215,11 @@ if __name__ == '__main__':
     print(predictions.metrics)
 
     # Save evaluation results to a JSON file
-    category_name = args.train_file.split("/")[2]
-    dataset_strategy = args.train_file.split("/")[3].split(".")[0]
-    save_path = os.path.join(
-        "results", category_name, args.model_name, "test-results-{}.json".format(dataset_strategy))
+    
     if not os.path.exists("results"):
         os.mkdir("results")
-    if not os.path.exists("results/"+category_name):
-        os.mkdir("results/"+category_name)
-    if not os.path.exists("results/"+category_name+"/"+args.model_name.split("/")[-1]):
-        os.mkdir("results/"+category_name+"/"+args.model_name.split("/")[-1])
+    save_path = os.path.join(
+        "results", "results-{}-{}-{}.json".format(dataset_name, model_name , train_strategy))
     with open(save_path, 'w') as f:
         json.dump(predictions.metrics, f)
 
