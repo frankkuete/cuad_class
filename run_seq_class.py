@@ -204,9 +204,9 @@ if __name__ == '__main__':
     )
 
     # start the training
-    #trainer.train()
-    #trainer.save_model()
-    #trainer.save_state()
+    trainer.train()
+    trainer.save_model()
+    trainer.save_state()
 
     # validate the model on the validation set
     predictions = trainer.predict(test_dataset=tokenized_test_set)
